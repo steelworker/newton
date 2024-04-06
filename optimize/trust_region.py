@@ -74,11 +74,11 @@ def projections(A, method=None, orth_tol=1e-12, max_refin=3, tol=1e-15):
         programming problems arising in optimization."
         SIAM Journal on Scientific Computing 23.4 (2001): 1376-1395.
     """
-    m, n = np.shape(A)
+    m, n = tr.shape(A)
 
     # The factorization of an empty matrix
     # only works for the sparse representation.
-    if m*n == 0:
+    if m * n == 0:
         A = csc_matrix(A)
 
     # Check Argument
@@ -136,12 +136,12 @@ def minimize(fun, x0, bounds=None, constraints=(), tol=None):
 
     # Set default lower and upper bounds.
     if trust_lb is None:
-        trust_lb = np.full(n, -np.inf)
+        trust_lb = tr.full(n, -tr.inf)
     if trust_ub is None:
-        trust_ub = np.full(n, np.inf)
+        trust_ub = tr.full(n, tr.inf)
 
     # Initial values
-    x = tr.copy(x0)
+    x = tr.clone(x0)
     trust_radius = initial_trust_radius
     penalty = initial_penalty
     # Compute Values
@@ -158,8 +158,8 @@ def minimize(fun, x0, bounds=None, constraints=(), tol=None):
     H = lagr_hess(x, v)
 
     # Update state parameters
-    optimality = norm(c + A.T.dot(v), np.inf)
-    constr_violation = norm(b, np.inf) if len(b) > 0 else 0
+    optimality = norm(c + A.T.dot(v), tr.inf)
+    constr_violation = norm(b, tr.inf) if len(b) > 0 else 0
     cg_info = {'niter': 0, 'stop_cond': 0,
                'hits_boundary': False}
 
