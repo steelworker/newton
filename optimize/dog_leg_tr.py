@@ -3,17 +3,34 @@ import torch as tr
 import numpy.linalg as ln
 import scipy as sp
 from math import sqrt
+from torch.autograd.functional import hessian, jacobian
 
-# Objective function    
-def f(x):
-    return (1-x[0])**2 + 100*(x[1]-x[0]**2)**2
+# # Objective function    
+# def f(x):
+#     return (1-x[0])**2 + 100*(x[1]-x[0]**2)**2
     
-# Gradient
-def jac(x):
-    return [-400*(x[1] - x[0]**2)*x[0] - 2 + 2*x[0], 200*x[1] - 200*x[0]**2]
-# Hessian
-def hess(x):
-    return [[1200*x[0]**2 - 400*x[1]+2, -400*x[0]], [-400*x[0], 200]]
+# # Gradient
+# def jac(x):    
+#     return tr.tensor([-400*(x[1] - x[0]**2)*x[0] - 2 + 2*x[0], 
+#                       200*x[1] - 200*x[0]**2])
+# # Hessian
+# def hess(x):
+#     return tr.tensor([[1200*x[0]**2 - 400*x[1]+2, -400*x[0]],
+#                       [-400*x[0], 200]])
+
+# def _jac(f, x):
+#     x.requires_grad_(True)
+#     with tr.enable_grad():
+#         result, = tr.autograd.grad(f(x), x)
+#     return result
+
+# def _hess(f, x):
+#     x.requires_grad_(True)
+#     with tr.enable_grad():
+#         result, = tr.autograd.grad(f(x), x)
+#     return result
+
+
 
     
 def dogleg_method(Hk, gk, Bk, trust_radius):
@@ -22,7 +39,7 @@ def dogleg_method(Hk, gk, Bk, trust_radius):
     # This is the optimum for the quadratic model function.
     # If it is inside the trust radius then return this point.
     pB = -Hk @ gk
-    norm_pB = sqrt(pB @ pB)
+    norm_pB = tr.sqrt(pB @ pB)
 
     # Test if the full step is within the trust region.
     if norm_pB <= trust_radius:
@@ -55,19 +72,17 @@ def dogleg_method(Hk, gk, Bk, trust_radius):
     return pU + tau * pB_pU
     
 
-def trust_region_dogleg(func, jac, hess, x0, initial_trust_radius=1.0,
+def trust_region_dogleg(func, x0, initial_trust_radius=1.0,
                         max_trust_radius=100.0, eta=0.15, gtol=1e-4, 
                         maxiter=100):
-    xk = x0
+    xk = x0.clone()
     trust_radius = initial_trust_radius
     k = 0
     while True:
-        print(k)
-      
-        gk = jac(xk)
-        Bk = hess(xk)
+
+        gk = jacobian(func, xk)
+        Bk = hessian(func, xk)
         Hk = tr.linalg.inv(Bk)
-        
         pk = dogleg_method(Hk, gk, Bk, trust_radius)
        
         # Actual reduction.

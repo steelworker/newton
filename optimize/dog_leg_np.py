@@ -14,6 +14,8 @@ def jac(x):
 def hess(x):
     return np.array([[1200*x[0]**2 - 400*x[1]+2, -400*x[0]], [-400*x[0], 200]])
 
+# def f(x):
+#     pass
     
 def dogleg_method(Hk, gk, Bk, trust_radius):
 
@@ -64,8 +66,7 @@ def trust_region_dogleg(func, jac, hess, x0, initial_trust_radius=1.0,
       
         gk = jac(xk)
         Bk = hess(xk)
-        Hk = np.linalg.inv(Bk)
-        
+        Hk = np.linalg.inv(Bk)        
         pk = dogleg_method(Hk, gk, Bk, trust_radius)
        
         # Actual reduction.
